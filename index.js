@@ -7,7 +7,7 @@ const fs = require("fs")
 const { ArgumentParser } = require('argparse')
 const { version } = require('./package.json')
 const path = require("path")
-const NUM_OF_PROMISES_LIMIT = 50
+const NUM_OF_PROMISES_LIMIT = 75
 
 
 async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
