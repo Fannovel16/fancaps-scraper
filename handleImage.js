@@ -12,7 +12,7 @@ async function downloadImage(axios, imageUrl, saveDir = `${__dirname}/images`) {
         writer.on('error', reject)
     })
 } */
-async function downloadImage(axios, { imageUrl, episodeTitle }, { saveDir, episodeTitle }) {
+async function downloadImage(axios, { imageUrl, episodeTitle }, { saveDir }) {
     const response = await axios(imageUrl, { responseType: "arraybuffer" })
     fs.writeFileSync(path.resolve(saveDir, episodeTitle, imageUrl.split('/').slice(-1)[0]), response.data)
 }
