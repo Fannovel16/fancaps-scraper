@@ -8,6 +8,6 @@ module.exports = () => {
             "User-Agent": randomUseragent.getRandom(ua => ["Chrome", "Firefox", "Safari"].includes(ua.browserName) && ua.osName === "Windows" && ua.osVersion === "10")
         }
     })
-    axiosRetry(axios, { retries: 10, retryDelay: 1000 })
+    axiosRetry(re, { retries: 10, retryDelay: 1000 })
     return re
 }
