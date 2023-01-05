@@ -35,11 +35,19 @@ async function main({ seriesUrl, saveDir, numOfPromises, forceUnlimitedPromises,
     if (dontDownloadImages) return
 
     if (!saveDir) saveDir = `./fancaps-images/${seriesTitle}`
-    for (const { episodeTitle, imageUrls } of episodeDataset) {
+    for (const { episodeTitle } of episodeDataset) {
         const episodePath = path.resolve(saveDir, episodeTitle)
         if (!fs.existsSync(episodePath)) fs.mkdirSync(episodePath, { recursive: true })
-        await runPromises({ task: "downloadImages", dataset: imageUrls, metadata: { saveDir, episodeTitle }, numOfPromises })
     }
+    let imageDataset = []
+    for (const { episodeTitle, imageUrls } of episodeDataset) {
+        for (const imageUrl of imageUrls) {
+            imageDataset.push({
+                imageUrl, episodeTitle
+            })
+        }
+    }
+    await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
 function parseArg() {
