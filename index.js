@@ -10,19 +10,26 @@ const path = require("path")
 const NUM_OF_PROMISES_LIMIT = 50
 
 
-async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMetadata, dontDownloadImages }) {
+async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
     if (numOfPromises > NUM_OF_PROMISES_LIMIT) throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like it.`)
 
-    const { seriesTitle, episodes } = await getSeriesData(seriesUrl)
-    const episodeDataset = await runPromises({
-        task: "getEpisodeDataset",
-        dataset: episodes,
-        metadata: { seriesTitle, skipNLastPages },
-        numOfPromises
-    })
+    let seriesTitle, episodes, episodeDataset
+    if (readMetadata) {
+        episodeDataset = JSON.parse(fs.readFileSync("metadata.json", "utf-8"))
+        seriesTitle = episodeDataset[0].seriesTitle
+    }
+    else {
+        ({ seriesTitle, episodes } = await getSeriesData(seriesUrl))
+        episodeDataset = await runPromises({
+            task: "getEpisodeDataset",
+            dataset: episodes,
+            metadata: { seriesTitle, skipNLastPages },
+            numOfPromises
+        })
+    }
 
-    if (writeMetadata) fs.writeFileSync("metadata.json", JSON.stringify(episodeDataset, null, 4))
+    if (!readMetadata && writeMetadata) fs.writeFileSync("metadata.json", JSON.stringify(episodeDataset, null, 4))
     if (dontDownloadImages) return
 
     if (!saveDir) saveDir = `./fancaps-images/${seriesTitle}`
@@ -39,7 +46,7 @@ async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMe
 
 function parseArg() {
     const parser = new ArgumentParser({
-        description: "FanCaps-Scrapper"
+        description: "FanCaps-Scrapper - A async scrapper for anime screenshots on fancaps.net"
     })
 
     parser.add_argument('-v', '--version', { action: 'version', version });
@@ -70,6 +77,12 @@ function parseArg() {
         required: false,
         action: "store_true",
         help: "Write episodeDataset to metadata.json"
+    })
+
+    parser.add_argument("--loadMetadata", {
+        required: false,
+        action: "store_true",
+        help: "Read episodeDataset from metadata.json"
     })
 
     parser.add_argument("--dontDownloadImages", {
