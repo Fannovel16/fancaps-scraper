@@ -21,7 +21,8 @@ node fancaps-scraper [-h] [-v] \
     [--numOfPromises NUMOFPROMISES] \
     [--skipNLastPages SKIPNLASTPAGES] \
     [--writeMetadata] \
-    [--dontDownloadImages]
+    [--dontDownloadImages] \
+    [--loadMetadata]
 ```
 Arguments:
   * -h, --help            show this help message and exit
@@ -30,7 +31,8 @@ Arguments:
   * --saveDir SAVEDIR     The location to save images, the default value is ./fancaps-images/title of series<br>(e.g. ./fancaps-images/Bocchi The Rock)
   * --numOfPromises NUMOFPROMISES The number of promise to use (imagine it is similar to multi-threading), must be <= 50 due to Cloudflare CDN's hidden rate limit
   * --skipNLastPages SKIPNLASTPAGES Skip n last pages so most of credit frames won't be downloaded
-  * --writeMetadata         Write episodeDataset to metadata.json
+  * --writeMetadata       Write episodeDataset to metadata.json
+  * --loadMetadata        Read episodeDataset from metadata.json
   * --dontDownloadImages
 
 
