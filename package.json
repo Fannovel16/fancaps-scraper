@@ -1,0 +1,16 @@
+{
+  "name": "fancaps-scraper",
+  "version": "0.0.1",
+  "description": "A scraper for fancaps.net",
+  "main": "index.js",
+  "repository": "https://github.com/Fannovel16/fancaps-scraper.git",
+  "author": "Hacker 17082006 <tai17082006.tk@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "argparse": "^2.0.1",
+    "axios": "^1.2.2",
+    "axios-retry": "^3.3.1",
+    "jsdom": "^20.0.3",
+    "random-useragent": "^0.5.0"
+  }
+}
