@@ -12,7 +12,9 @@ const NUM_OF_PROMISES_LIMIT = 75
 
 async function main({ seriesUrl, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
-    if (numOfPromises > NUM_OF_PROMISES_LIMIT && !forceUnlimitedPromises) throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like it.`)
+    if (numOfPromises > NUM_OF_PROMISES_LIMIT && !forceUnlimitedPromises) {
+        throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like traffic from your network. Use --forceUnlimitedPromises to bypass (e.g. when you are running this script on Google Colab).`)
+    }
 
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
