@@ -36,15 +36,21 @@ async function getAllImageUrls(episodeUrl, skipNLastPages = 2) {
     return imageUrls
 } */
 
+const GET_EPISODE_PROMISE_AMOUNT = 5
 async function getEpisodeDataset({ episodeTitle, episodeUrl }, { skipNLastPages = 2, seriesTitle }) {
     episodeUrl = new URL(episodeUrl)
     let i = 0
     let imageUrls2d = []
     while (true) {
-        episodeUrl.searchParams.set("page", ++i)
-        const imageUrls = await getCurrPageImageUrls(episodeUrl.toString())
-        if (imageUrls.length === 0) break
-        imageUrls2d.push(imageUrls)
+        let currImageUrls2dPromises = []
+        for (let j = 0; j < GET_EPISODE_PROMISE_AMOUNT; j++) {
+            episodeUrl.searchParams.set("page", i)
+            currImageUrls2dPromises.push(getCurrPageImageUrls(episodeUrl.toString()))
+        }
+        const currImageUrls2d = await Promise.all(currImageUrls2dPromises)
+        imageUrls2d.push(...currImageUrls2d)
+        if (currImageUrls2d.find(el => el.length === 0)) break
+        i += GET_EPISODE_PROMISE_AMOUNT
     }
     if (skipNLastPages) imageUrls2d = imageUrls2d.slice(0, -skipNLastPages)
     episodeUrl.searchParams.delete("page")
