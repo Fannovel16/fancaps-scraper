@@ -75,7 +75,7 @@ function parseArg() {
         help: "Write episodeDataset to metadata.json"
     })
 
-    parser.add_argument("--loadMetadata", {
+    parser.add_argument("--readMetadata", {
         required: false,
         action: "store_true",
         help: "Read episodeDataset from metadata.json"

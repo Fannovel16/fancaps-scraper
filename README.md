@@ -22,7 +22,7 @@ node fancaps-scraper [-h] [-v] \
     [--skipNLastPages SKIPNLASTPAGES] \
     [--writeMetadata] \
     [--dontDownloadImages] \
-    [--loadMetadata]
+    [--readMetadata]
 ```
 Arguments:
   * -h, --help            show this help message and exit
@@ -32,7 +32,7 @@ Arguments:
   * --numOfPromises NUMOFPROMISES The number of promise to use (imagine it is similar to multi-threading), must be <= 50 due to Cloudflare CDN's hidden rate limit
   * --skipNLastPages SKIPNLASTPAGES Skip n last pages so most of credit frames won't be downloaded
   * --writeMetadata       Write episodeDataset to metadata.json
-  * --loadMetadata        Read episodeDataset from metadata.json
+  * --readMetadata        Read episodeDataset from metadata.json
   * --dontDownloadImages
 
 
