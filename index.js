@@ -7,10 +7,12 @@ const fs = require("fs")
 const { ArgumentParser } = require('argparse')
 const { version } = require('./package.json')
 const path = require("path")
+const NUM_OF_PROMISES_LIMIT = 50
 
 
 async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMetadata, dontDownloadImages }) {
-    if (numOfPromises < 1) throw new Error(`Invaild --numOfPromises=${numOfPromises}`)
+    if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
+    if (numOfPromises > NUM_OF_PROMISES_LIMIT) throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like it.`)
 
     const { seriesTitle, episodes } = await getSeriesData(seriesUrl)
     const episodeDataset = await runPromises({
@@ -54,8 +56,8 @@ function parseArg() {
     parser.add_argument("--numOfPromises", {
         required: false,
         type: "int",
-        help: "The number of promise to use (imagine it is similar to multi-threading), should be <= 75 due to Cloudflare CDN's hidden rate limit I guess",
-        default: 50
+        help: `The number of promise to use (imagine it is similar to multi-threading), must be <= ${NUM_OF_PROMISES_LIMIT} due to Cloudflare CDN's hidden rate limit`,
+        default: NUM_OF_PROMISES_LIMIT
     })
     parser.add_argument("--skipNLastPages", {
         required: false,
