@@ -10,9 +10,9 @@ const path = require("path")
 const NUM_OF_PROMISES_LIMIT = 75
 
 
-async function main({ seriesUrl, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
+async function main({ seriesUrl, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
-    if (numOfPromises > NUM_OF_PROMISES_LIMIT) throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like it.`)
+    if (numOfPromises > NUM_OF_PROMISES_LIMIT && !forceUnlimitedPromises) throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like it.`)
 
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
@@ -59,8 +59,12 @@ function parseArg() {
     parser.add_argument("--numOfPromises", {
         required: false,
         type: "int",
-        help: `The number of promise to use (imagine it is similar to multi-threading), must be <= ${NUM_OF_PROMISES_LIMIT} due to Cloudflare CDN's hidden rate limit`,
+        help: `The number of promises to use (imagine it is similar to multi-threading). A error will be thrown if it > ${NUM_OF_PROMISES_LIMIT} due to Cloudflare CDN's hidden rate limit unless --forceUnlimitedPromises is passed`,
         default: NUM_OF_PROMISES_LIMIT
+    })
+    parser.add_argument("--forceUnlimitedPromises", {
+        required: false,
+        action: "store_true",
     })
     parser.add_argument("--skipNLastPages", {
         required: false,
