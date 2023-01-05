@@ -44,7 +44,7 @@ async function getEpisodeDataset({ episodeTitle, episodeUrl }, { skipNLastPages 
     while (true) {
         let currImageUrls2dPromises = []
         for (let j = 0; j < GET_EPISODE_PROMISE_AMOUNT; j++) {
-            episodeUrl.searchParams.set("page", j)
+            episodeUrl.searchParams.set("page", i + j)
             currImageUrls2dPromises.push(getCurrPageImageUrls(episodeUrl.toString()))
         }
         const currImageUrls2d = await Promise.all(currImageUrls2dPromises)
