@@ -14,7 +14,7 @@ npm install
 ## Usage
 
 ```bash
-fancaps-scraper [-h] [-v] \ 
+node . [-h] [-v] \ 
     --seriesUrl SERIESURL \
     [--saveDir SAVEDIR] \
     [--numOfPromises NUMOFPROMISES] \
