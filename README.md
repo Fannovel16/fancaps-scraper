@@ -9,12 +9,13 @@ README template from https://www.makeareadme.com/
 git clone https://github.com/Fannovel16/fancaps-scraper
 cd fancaps-scraper
 npm install
+cd ..
 ```
 
 ## Usage
 
 ```bash
-node . [-h] [-v] \ 
+node fancaps-scraper [-h] [-v] \ 
     --seriesUrl SERIESURL \
     [--saveDir SAVEDIR] \
     [--numOfPromises NUMOFPROMISES] \
