@@ -9,6 +9,37 @@ const { ArgumentParser } = require('argparse')
 const { version } = require('./package.json')
 const path = require("path")
 const NUM_OF_PROMISES_LIMIT = 75
+const cliProgress = require('cli-progress')
+const colors = require('ansi-colors')
+const glob = require("glob")
+const { createSpinner } = require("nanospinner")
+
+function progressBarInterval(saveDir, imageDataset) {
+    const bar = new cliProgress.SingleBar({
+        format: `{percentage}%|${colors.cyan('{bar}')}| {value}/{total} [{duration_formatted}<{eta_formatted}, {speed} img/s]`,
+        barCompleteChar: '█',
+        barIncompleteChar: ' ',
+        hideCursor: true
+    })
+
+    bar.start(imageDataset.length, 0, {
+        speed: 0
+    })
+    
+    let prevProgess = 0
+    const interval = setInterval(async () => {
+        const jpgFiles = await new Promise(re => glob(`${saveDir}/**/*.jpg`, (err, matches) => re(matches)))
+        bar.update(jpgFiles.length, {
+            speed: (jpgFiles.length - prevProgess) / 0.5
+        })
+        prevProgess = jpgFiles.length
+        if (jpgFiles.length === imageDataset.length) {
+            bar.stop()
+            clearInterval(interval)
+        }
+    }, 500)
+    return interval
+}
 
 async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
@@ -25,19 +56,24 @@ async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipN
 }
 
 async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
+    let spinner
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
         episodeDataset = JSON.parse(fs.readFileSync("metadata.json", "utf-8"))
         seriesTitle = episodeDataset[0].seriesTitle
     }
     else {
+        spinner = createSpinner("Get series data").start();
         ({ seriesTitle, episodes } = await getSeriesData(url))
+        spinner.success()
+        spinner = createSpinner("Get episode dataset").start()
         episodeDataset = await runPromises({
             task: "getEpisodeDataset",
             dataset: episodes,
             metadata: { seriesTitle, skipNLastPages },
             numOfPromises
         })
+        spinner.success()
     }
 
     if (!readMetadata && writeMetadata) fs.writeFileSync("metadata.json", JSON.stringify(episodeDataset, null, 4))
@@ -56,11 +92,15 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
             })
         }
     }
+    console.log("Download images...")
+    progressBarInterval(saveDir, imageDataset)
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
 async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages }) {
-    const { movieTitle, imageUrls } = await getMovieData(url, {numOfPromises, skipNLastPages})
+    let spinner = createSpinner("Get movie data")
+    const { movieTitle, imageUrls } = await getMovieData(url, { numOfPromises, skipNLastPages })
+    spinner.success()
     if (!saveDir) saveDir = `./fancaps-images/${movieTitle}`
     if (!fs.existsSync(movieTitle)) fs.mkdirSync(saveDir, { recursive: true })
     let imageDataset = []
@@ -69,6 +109,8 @@ async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages }) {
             imageUrl, title: ''
         })
     }
+    console.log("Download images...")
+    progressBarInterval(saveDir, imageDataset)
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
@@ -143,7 +185,7 @@ async function runPromises({ task, dataset, numOfPromises, metadata }) {
     return (await Promise.all(workerPromises)).flat(2)
 }
 
-
+console.log("Inputed arguments:")
 console.dir(parseArg())
 try {
     main(parseArg())
