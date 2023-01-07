@@ -56,24 +56,24 @@ async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipN
 }
 
 async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages, disableProgressBar }) {
-    let spinner
+    //let spinner
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
         episodeDataset = JSON.parse(fs.readFileSync("metadata.json", "utf-8"))
         seriesTitle = episodeDataset[0].seriesTitle
     }
     else {
-        spinner = createSpinner("Get series data").start();
+        //spinner = createSpinner("Get series data").start();
         ({ seriesTitle, episodes } = await getSeriesData(url))
-        spinner.success()
-        spinner = createSpinner("Get episode dataset").start()
+        //spinner.success()
+        //spinner = createSpinner("Get episode dataset").start()
         episodeDataset = await runPromises({
             task: "getEpisodeDataset",
             dataset: episodes,
             metadata: { seriesTitle, skipNLastPages },
             numOfPromises
         })
-        spinner.success()
+        //spinner.success()
     }
 
     if (!readMetadata && writeMetadata) fs.writeFileSync("metadata.json", JSON.stringify(episodeDataset, null, 4))
@@ -98,9 +98,9 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
 }
 
 async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages, disableProgressBar }) {
-    let spinner = createSpinner("Get movie data").start()
+    //let spinner = createSpinner("Get movie data").start()
     const { movieTitle, imageUrls } = await getMovieData(url, { numOfPromises, skipNLastPages })
-    spinner.success()
+    //spinner.success()
     if (!saveDir) saveDir = `./fancaps-images/${movieTitle}`
     if (!fs.existsSync(movieTitle)) fs.mkdirSync(saveDir, { recursive: true })
     let imageDataset = []
