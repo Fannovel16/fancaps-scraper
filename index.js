@@ -98,7 +98,7 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
 }
 
 async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages, disableProgressBar }) {
-    let spinner = createSpinner("Get movie data")
+    let spinner = createSpinner("Get movie data").start()
     const { movieTitle, imageUrls } = await getMovieData(url, { numOfPromises, skipNLastPages })
     spinner.success()
     if (!saveDir) saveDir = `./fancaps-images/${movieTitle}`
