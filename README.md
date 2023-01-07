@@ -40,6 +40,7 @@ Arguments:
   * `--readMetadata`:        Read episodeDataset from metadata.json
   * --dontDownloadImages
   * --colab: Add line break to the progress bar if the env is Colab
+  * --disableProgressBar
 
 ### Result folder architecture
 #### Episode

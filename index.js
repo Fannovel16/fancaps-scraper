@@ -41,21 +41,21 @@ function progressBarInterval(saveDir, imageDataset) {
     return interval
 }
 
-async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
+async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages, disableProgressBar }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
     if (numOfPromises > NUM_OF_PROMISES_LIMIT && !forceUnlimitedPromises) {
         throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like traffic from your network. Use --forceUnlimitedPromises to bypass (e.g. when you are running this script on Google Colab).`)
     }
     if (url.includes("https://fancaps.net/movies/MovieImages.php")) {
-        return await handleMovie({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages })
+        return await handleMovie({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages, disableProgressBar })
     }
     if (url.includes("https://fancaps.net/anime/showimages.php")) {
-        return await handleSeries({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages })
+        return await handleSeries({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages, disableProgressBar })
     }
     throw new Error(`${url} isn't url of series or movie on https://fancaps.net`)
 }
 
-async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
+async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages, disableProgressBar }) {
     let spinner
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
@@ -93,7 +93,7 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
         }
     }
     console.log("Download images...")
-    progressBarInterval(saveDir, imageDataset)
+    if(!disableProgressBar) progressBarInterval(saveDir, imageDataset)
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
@@ -110,7 +110,7 @@ async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages }) {
         })
     }
     console.log("Download images...")
-    progressBarInterval(saveDir, imageDataset)
+    if (!disableProgressBar) progressBarInterval(saveDir, imageDataset)
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
