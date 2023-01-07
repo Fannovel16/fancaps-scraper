@@ -28,7 +28,10 @@ node fancaps-scraper [-h] [-v] \
 Arguments:
   * -h, --help:            show this help message and exit
   * -v, --version:         show program's version number and exit
-  * `--seriesUrl SERIESURL`: The url of the series you want to download images from, not the episode url<br>(e.g. https://fancaps.net/anime/showimages.php?33224-Bocchi_the_Rock)
+  * `--url URL`: The url of the series or movie you want to download images from, not the episode url.<br>Any kind of url that starts with `https://fancaps.net/movies/MovieImages.php` or `https://fancaps.net/anime/showimages.php` will be accepted e.g.:
+  ** https://fancaps.net/anime/showimages.php?33224-Bocchi_the_Rock
+  ** https://fancaps.net/movies/MovieImages.php?name=Fate_Stay_Night_Heaven_s_Feel_I_Presage_Flower_2017&movieid=2666
+  ** https://fancaps.net/movies/MovieImages.php?movieid=2666
   * `--saveDir SAVEDIR`:     The location to save images, the default value is ./fancaps-images/title of series<br>(e.g. ./fancaps-images/Bocchi The Rock)
   * `--numOfPromises NUMOFPROMISES`: The number of promises to use (imagine it is similar to multi-threading).<br>A error will be thrown if it > 75 due to Cloudflare CDN's hidden rate limit unless --forceUnlimitedPromises is passed
   * `--forceUnlimitedPromises`
@@ -38,6 +41,7 @@ Arguments:
   * --dontDownloadImages
 
 ### Result folder architecture
+#### Episode
 ```
 $saveDir
 ├── Episode 1
@@ -80,6 +84,13 @@ Should give the following result:
 ├───Episode 10
 ├───Episode 11
 └───Episode 12
+```
+#### Movie
+```
+$saveDir
+├── intId.jpg
+├── anotherIntId.jpg
+├── ...
 ```
 
 ## Contributing

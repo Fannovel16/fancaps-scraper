@@ -21,7 +21,7 @@ async function getSeriesData(seriesUrl) {
             seriesTitle = document.querySelector("h1.post_title").textContent
                 .replace("Viewing Popular Images From", '')
                 .trim() //Get the only title
-                .replace(':', '-') //File system don't like colons which usually appear in shounen series' title
+                .replace(': ', ' - ') //File system don't like colons which usually appear in shounen series' title
         }
 
     }

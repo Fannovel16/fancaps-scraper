@@ -1,7 +1,8 @@
-const { getSeriesData } = require("./handleSeries")
-const { getEpisodeDataset } = require("./handleEpisode")
+const { getSeriesData } = require("./series")
+const { getMovieData } = require("./movie")
+const { getEpisodeDataset } = require("./episode")
 const divineArrEqually = require("./divineArrEqually")
-const { downloadImage } = require("./handleImage")
+const { downloadImage } = require("./image")
 const createAxios = require("./createAxios")
 const fs = require("fs")
 const { ArgumentParser } = require('argparse')
@@ -9,20 +10,28 @@ const { version } = require('./package.json')
 const path = require("path")
 const NUM_OF_PROMISES_LIMIT = 75
 
-
-async function main({ seriesUrl, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
+async function main({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     if (numOfPromises < 1) throw new Error(`--numOfPromises=${numOfPromises} is invalid cuz you can't have negative number of workers lol`)
     if (numOfPromises > NUM_OF_PROMISES_LIMIT && !forceUnlimitedPromises) {
         throw new Error(`--numOfPromises=${numOfPromises} is too big lol. Cloudflare won't like traffic from your network. Use --forceUnlimitedPromises to bypass (e.g. when you are running this script on Google Colab).`)
     }
+    if (url.includes("https://fancaps.net/movies/MovieImages.php")) {
+        return await handleMovie({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages })
+    }
+    if (url.includes("https://fancaps.net/anime/showimages.php")) {
+        return await handleSeries({ url, saveDir, numOfPromises, forceUnlimitedPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages })
+    }
+    throw new Error(`${url} isn't url of series or movie on https://fancaps.net`)
+}
 
+async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, writeMetadata, readMetadata, dontDownloadImages }) {
     let seriesTitle, episodes, episodeDataset
     if (readMetadata) {
         episodeDataset = JSON.parse(fs.readFileSync("metadata.json", "utf-8"))
         seriesTitle = episodeDataset[0].seriesTitle
     }
     else {
-        ({ seriesTitle, episodes } = await getSeriesData(seriesUrl))
+        ({ seriesTitle, episodes } = await getSeriesData(url))
         episodeDataset = await runPromises({
             task: "getEpisodeDataset",
             dataset: episodes,
@@ -43,9 +52,22 @@ async function main({ seriesUrl, saveDir, numOfPromises, forceUnlimitedPromises,
     for (const { episodeTitle, imageUrls } of episodeDataset) {
         for (const imageUrl of imageUrls) {
             imageDataset.push({
-                imageUrl, episodeTitle
+                imageUrl, title: episodeTitle
             })
         }
+    }
+    await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
+}
+
+async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages }) {
+    const { movieTitle, imageUrls } = await getMovieData(url, {numOfPromises, skipNLastPages})
+    if (!saveDir) saveDir = `./fancaps-images/${movieTitle}`
+    if (!fs.existsSync(movieTitle)) fs.mkdirSync(saveDir, { recursive: true })
+    let imageDataset = []
+    for (const imageUrl of imageUrls) {
+        imageDataset.push({
+            imageUrl, title: ''
+        })
     }
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
@@ -56,10 +78,10 @@ function parseArg() {
     })
 
     parser.add_argument('-v', '--version', { action: 'version', version });
-    parser.add_argument("--seriesUrl", {
+    parser.add_argument("--url", {
         required: true,
         type: "str",
-        help: "The url of the series you want to download images from, not the episode url (e.g. https://fancaps.net/anime/showimages.php?33224-Bocchi_the_Rock)"
+        help: "The url of the series or movie you want to download images from, not the episode url (e.g. https://fancaps.net/anime/showimages.php?33224-Bocchi_the_Rock)"
     })
     parser.add_argument("--saveDir", {
         required: false,
