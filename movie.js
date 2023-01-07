@@ -2,15 +2,16 @@ const axios = require("./createAxios")()
 const { JSDOM } = require("jsdom")
 const { getImageId } = require("./image")
 
-const GET_MOVIE_PROMISE_AMOUNT = 20
-async function getMovieData(movieUrl, { skipNLastPages }) {
+
+async function getMovieData(movieUrl, { skipNLastPages, numOfPromises }) {
+    if (numOfPromises > 100) numOfPromises = 100
     movieUrl = new URL(movieUrl)
     let i = 0
     let imageUrls2d = []
     while (true) {
         let currImageUrls2dPromises = []
         for (let j = 0; j < GET_MOVIE_PROMISE_AMOUNT; j++) {
-            movieUrl.searchParams.set("page", i + j)
+            movieUrl.searchParams.set("page", i + j + 1)
             currImageUrls2dPromises.push(getCurrPageImageUrls(movieUrl.toString()))
         }
         const currImageUrls2d = await Promise.all(currImageUrls2dPromises)
