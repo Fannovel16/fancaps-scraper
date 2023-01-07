@@ -167,6 +167,10 @@ function parseArg() {
         required: false,
         action: "store_true"
     })
+    parser.add_argument("--colab", {
+        required: false,
+        action: "store_true"
+    })
     return parser.parse_args()
 }
 
