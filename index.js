@@ -16,7 +16,7 @@ const { createSpinner } = require("nanospinner")
 
 function progressBarInterval(saveDir, imageDataset) {
     const bar = new cliProgress.SingleBar({
-        format: `{percentage}%|${colors.cyan('{bar}')}| {value}/{total} [{duration_formatted}<{eta_formatted}, {speed} img/s]`,
+        format: `{percentage}%|${colors.cyan('{bar}')}| {value}/{total} [{duration_formatted}<{eta_formatted}, {speed} img/s]${process.argv.includes("--colab") ? '\n' : ''}`,
         barCompleteChar: '█',
         barIncompleteChar: ' ',
         hideCursor: true

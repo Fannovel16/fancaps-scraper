@@ -39,6 +39,7 @@ Arguments:
   * `--writeMetadata`:       Write episodeDataset to metadata.json
   * `--readMetadata`:        Read episodeDataset from metadata.json
   * --dontDownloadImages
+  * --colab: Add line break to the progress bar if the env is Colab
 
 ### Result folder architecture
 #### Episode
