@@ -4,18 +4,13 @@ const { getImageId } = require("./image")
 
 async function getMovieData(movieUrl, { numOfPromises, skipNLastPages }) {
     movieUrl = new URL(movieUrl)
-    let i = 0
     let imageUrls2d = []
+    let i = 0
     while (true) {
-        let currImageUrls2dPromises = []
-        for (let j = 0; j < numOfPromises; j++) {
-            movieUrl.searchParams.set("page", i + j)
-            currImageUrls2dPromises.push(await getCurrPageImageUrls(movieUrl.toString()))
-        }
-        const currImageUrls2d = await Promise.all(currImageUrls2dPromises)
-        imageUrls2d.push(...currImageUrls2d)
-        if (currImageUrls2d.find(el => el.length === 0)) break
-        i += GET_EPISODE_PROMISE_AMOUNT
+        movieUrl.searchParams.set("page", ++i)
+        const currImageUrls = await getCurrPageImageUrls(movieUrl.toString())
+        if (currImageUrls.find(el => el.length === 0)) break
+        imageUrls2d.push(currImageUrls)
     }
     if (skipNLastPages) imageUrls2d = imageUrls2d.slice(0, -skipNLastPages)
 
