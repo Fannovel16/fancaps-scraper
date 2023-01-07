@@ -97,7 +97,7 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
     await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
-async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages }) {
+async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages, disableProgressBar }) {
     let spinner = createSpinner("Get movie data")
     const { movieTitle, imageUrls } = await getMovieData(url, { numOfPromises, skipNLastPages })
     spinner.success()
