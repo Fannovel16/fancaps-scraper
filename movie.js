@@ -16,7 +16,7 @@ async function getMovieData(movieUrl, { skipNLastPages, numOfPromises }) {
         const currImageUrls2d = await Promise.all(currImageUrls2dPromises)
         imageUrls2d.push(...currImageUrls2d)
         if (Number(new JSDOM((await axios(movieUrl.toString())).data)
-            .window.document.querySelector("li.active").textContent.trim()) > i + numOfPromises) break
+            .window.document.querySelector("li.active").textContent.trim()) < i + numOfPromises) break
         i += numOfPromises
     }
     if (skipNLastPages) imageUrls2d = imageUrls2d.slice(0, -skipNLastPages)
