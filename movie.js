@@ -19,7 +19,7 @@ async function getMovieData(movieUrl, { skipNLastPages, numOfPromises }) {
             break
         }
         imageUrls2d.push(currImageUrls2d.flat())
-        i++
+        i += numOfPromises
     }
     if (skipNLastPages) imageUrls2d = imageUrls2d.slice(0, -skipNLastPages)
 
