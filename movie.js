@@ -2,15 +2,23 @@ const axios = require("./createAxios")()
 const { JSDOM } = require("jsdom")
 const { getImageId } = require("./image")
 
-async function getMovieData(movieUrl, { skipNLastPages }) {
+async function getMovieData(movieUrl, { skipNLastPages, numOfPromises }) {
     movieUrl = new URL(movieUrl)
     let i = 1
     let imageUrls2d = []
     while (true) {
-        movieUrl.searchParams.set("page", i)
-        let currImageUrls = await getCurrPageImageUrls(movieUrl.toString())
-        if (currImageUrls[0] === imageUrls2d.slice(0, -1)[0][0]) break
-        imageUrls2d.push(currImageUrls)
+        let currImageUrls2dPromises = []
+        for (let j = 0; j < numOfPromises; j++) {
+            movieUrl.searchParams.set("page", j)
+            currImageUrls2dPromises.push(getCurrPageImageUrls(movieUrl.toString()))
+        }
+        let currImageUrls2d = (await Promise.allSettled(currImageUrls2dPromises)).map(el => el.value)
+        const errI = currImageUrls2d.findIndex(el => !el)
+        if (errI >= 0) {
+            imageUrls2d.push(currImageUrls2d.slice(0, errI).flat())
+            break
+        }
+        imageUrls2d.push(currImageUrls2d.flat())
         i++
     }
     if (skipNLastPages) imageUrls2d = imageUrls2d.slice(0, -skipNLastPages)
@@ -34,6 +42,9 @@ async function getCurrPageImageUrls(movieUrl) {
     const { data: pageHtml } = await axios(movieUrl)
     const { document } = (new JSDOM(pageHtml)).window
     const imagesContainerEl = document.querySelector(".post_title ").nextElementSibling
+    if (document.querySelector("li.active").textContent.trim() > new URL(movieUrl).searchParams.get("page")) {
+        throw new Error("Page number invalid")
+    }
     return [...imagesContainerEl.querySelectorAll("img.imageFade")].map(el => `https://cdni.fancaps.net/file/fancaps-movieimages/${getImageId(el.src)}.jpg`)
 }
 
