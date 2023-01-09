@@ -9,7 +9,7 @@ async function getMovieData(movieUrl, { skipNLastPages, numOfPromises }) {
     while (true) {
         let currImageUrls2dPromises = []
         for (let j = 0; j < numOfPromises; j++) {
-            movieUrl.searchParams.set("page", j)
+            movieUrl.searchParams.set("page", i + j)
             currImageUrls2dPromises.push(getCurrPageImageUrls(movieUrl.toString()))
         }
         let currImageUrls2d = (await Promise.allSettled(currImageUrls2dPromises)).map(el => el.value)
