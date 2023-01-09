@@ -42,7 +42,7 @@ async function getCurrPageImageUrls(movieUrl) {
     const { data: pageHtml } = await axios(movieUrl)
     const { document } = (new JSDOM(pageHtml)).window
     const imagesContainerEl = document.querySelector(".post_title ").nextElementSibling
-    if (document.querySelector("li.active").textContent.trim() > new URL(movieUrl).searchParams.get("page")) {
+    if (Number(document.querySelector("li.active").textContent.trim()) !== Number(new URL(movieUrl).searchParams.get("page"))) {
         throw new Error("Page number invalid")
     }
     return [...imagesContainerEl.querySelectorAll("img.imageFade")].map(el => `https://cdni.fancaps.net/file/fancaps-movieimages/${getImageId(el.src)}.jpg`)
