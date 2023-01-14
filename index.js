@@ -13,6 +13,8 @@ const cliProgress = require('cli-progress')
 const colors = require('ansi-colors')
 const glob = require("glob")
 const { createSpinner } = require("nanospinner")
+const util = require('util')
+const exec = util.promisify(require('child_process').exec)
 
 function progressBarInterval(saveDir, imageDataset) {
     const bar = new cliProgress.SingleBar({
@@ -25,7 +27,7 @@ function progressBarInterval(saveDir, imageDataset) {
     bar.start(imageDataset.length, 0, {
         speed: 0
     })
-    
+
     let prevProgess = 0
     const interval = setInterval(async () => {
         const jpgFiles = await new Promise(re => glob(`${saveDir}/**/*.jpg`, (err, matches) => re(matches)))
@@ -80,21 +82,22 @@ async function handleSeries({ url, saveDir, numOfPromises, skipNLastPages, write
     if (dontDownloadImages) return
 
     if (!saveDir) saveDir = `./fancaps-images/${seriesTitle}`
-    for (const { episodeTitle } of episodeDataset) {
-        const episodePath = path.resolve(saveDir, episodeTitle)
-        if (!fs.existsSync(episodePath)) fs.mkdirSync(episodePath, { recursive: true })
-    }
     let imageDataset = []
     for (const { episodeTitle, imageUrls } of episodeDataset) {
-        for (const imageUrl of imageUrls) {
-            imageDataset.push({
-                imageUrl, title: episodeTitle
-            })
+        const episodePath = path.resolve(saveDir, episodeTitle)
+        if (!fs.existsSync(episodePath)) fs.mkdirSync(episodePath, { recursive: true })
+        imageDataset.push(...imageUrls)
+    }
+
+    console.log("Download images...")
+    if (!disableProgressBar) progressBarInterval(saveDir, imageDataset)
+    for (const { episodeTitle, imageUrls } of episodeDataset) {
+        for (const imageUrlsBatch of divineArrEqually(imageUrls, 100)) {
+            await exec(
+                `aria2c --summary-interval=10 -c -x 16 -k 1M -s ${numOfPromises} -Z -d "${path.resolve(saveDir, episodeTitle)}" ${imageUrlsBatch.join(' ')}`
+            )
         }
     }
-    console.log("Download images...")
-    if(!disableProgressBar) progressBarInterval(saveDir, imageDataset)
-    await runPromises({ task: "downloadImages", dataset: imageDataset, metadata: { saveDir }, numOfPromises })
 }
 
 async function handleMovie({ url, saveDir, numOfPromises, skipNLastPages, disableProgressBar }) {
